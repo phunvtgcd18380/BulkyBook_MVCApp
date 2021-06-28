@@ -1,4 +1,4 @@
-﻿using BulkyBook_MVCApp.Models;
+﻿using BulkyBook_MVCApp.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,8 +7,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BulkyBook_MVCApp.Controllers
+namespace BulkyBook_MVCApp.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
