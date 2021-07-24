@@ -1,4 +1,5 @@
-﻿using BulkyBook_MVCApp.DataAccess.Repository.IRepository;
+﻿using BulkyBook_MVCApp.DataAccess.Data;
+using BulkyBook_MVCApp.DataAccess.Repository.IRepository;
 using BulkyBook_MVCApp.Models;
 using BulkyBook_MVCApp.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +16,11 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public CategoryController(IUnitOfWork unitOfWork)
+        private readonly ApplicationDbContext _db;
+        public CategoryController(IUnitOfWork unitOfWork,ApplicationDbContext db)
         {
             _unitOfWork = unitOfWork;
+            _db = db;
         }
         public IActionResult Index()
         {
@@ -34,6 +37,7 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
             }
             //this is for edit
             category = _unitOfWork.Category.Get(id.GetValueOrDefault());
+            //category = _db.Categories.Find(id.GetValueOrDefault());
             if(category == null)
             {
                 return NotFound();
@@ -50,10 +54,12 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
                 if (category.Id == 0)
                 {
                     _unitOfWork.Category.Add(category);
+                    //_db.Categories.Add(category);
                 }
                 else
                 {
                     _unitOfWork.Category.Update(category);
+                    //_db.Categories.Update(category);
                 }
                 _unitOfWork.Save();
                 return RedirectToAction(nameof(Index));
@@ -65,6 +71,7 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
         public IActionResult GetAll()
         {
             var allObj = _unitOfWork.Category.GetAll();
+            //var allObj = _db.Categories.ToList();
             return Json(new { data = allObj });
         }
 

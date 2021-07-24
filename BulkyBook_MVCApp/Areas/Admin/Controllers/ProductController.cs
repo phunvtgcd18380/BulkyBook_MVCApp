@@ -1,4 +1,5 @@
-﻿using BulkyBook_MVCApp.DataAccess.Repository.IRepository;
+﻿using BulkyBook_MVCApp.DataAccess.Data;
+using BulkyBook_MVCApp.DataAccess.Repository.IRepository;
 using BulkyBook_MVCApp.Models;
 using BulkyBook_MVCApp.Models.ViewModels;
 using BulkyBook_MVCApp.Utility;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,11 +22,13 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly ApplicationDbContext _db;
 
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment)
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment, ApplicationDbContext db)
         {
             _unitOfWork = unitOfWork;
             _hostEnvironment = hostEnvironment;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -121,6 +125,23 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
                 _unitOfWork.Save();
                 return RedirectToAction(nameof(Index));
             }
+            else
+            {
+                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+                productVM.CoverTypeList = _unitOfWork.coverType.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+                if (productVM.Product.Id != 0)
+                {
+                    productVM.Product = _unitOfWork.Product.Get(productVM.Product.Id);
+                }
+            }
             return View(productVM);
         }
 
@@ -131,6 +152,7 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
         public IActionResult GetAll()
         {
             var allObj = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
+            //var allObj = _db.Products.Include(o => o.Category).Include(i => i.CoverType).ToList();
             return Json(new { data = allObj });
         }
 
