@@ -1,11 +1,13 @@
 using BulkyBook_MVCApp.DataAccess.Data;
 using BulkyBook_MVCApp.DataAccess.Repository;
 using BulkyBook_MVCApp.DataAccess.Repository.IRepository;
+using BulkyBook_MVCApp.Utility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,10 +36,28 @@ namespace BulkyBook_MVCApp
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddSingleton<IEmailSender, EmailSender>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+            services.AddAuthentication().AddFacebook(option =>
+            {
+                option.AppId = "1564219340625225";
+                option.AppSecret = "6785bc3b5c5e05cd47ba20f562205274";
+            });
+            services.AddAuthentication().AddGoogle(option =>
+            {
+                option.ClientId = "158587258072-mkcpfq73demm5hv29snaoh887p0qqmd7.apps.googleusercontent.com";
+                option.ClientSecret = "k4GTa2L7hX27Y2oXeyUCCHG_";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

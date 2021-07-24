@@ -1,6 +1,8 @@
 ﻿using BulkyBook_MVCApp.DataAccess.Repository.IRepository;
 using BulkyBook_MVCApp.Models;
 using BulkyBook_MVCApp.Models.ViewModels;
+using BulkyBook_MVCApp.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +15,7 @@ using System.Threading.Tasks;
 namespace BulkyBook_MVCApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +31,7 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
         {
             return View();
         }
-
+        [HttpGet]
         public IActionResult Upsert(int? id)
         {
             ProductVM productVM = new ProductVM()
@@ -97,7 +100,7 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
                 }
                 else
                 {
-                    //update when they do not change the image
+                    //update when do not change the image
                     if (productVM.Product.Id != 0)
                     {
                         Product objFromDb = _unitOfWork.Product.Get(productVM.Product.Id);
@@ -117,23 +120,6 @@ namespace BulkyBook_MVCApp.Areas.Admin.Controllers
                 }
                 _unitOfWork.Save();
                 return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                });
-                productVM.CoverTypeList = _unitOfWork.coverType.GetAll().Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                });
-                if (productVM.Product.Id != 0)
-                {
-                    productVM.Product = _unitOfWork.Product.Get(productVM.Product.Id);
-                }
             }
             return View(productVM);
         }

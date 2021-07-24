@@ -12,6 +12,8 @@ namespace BulkyBook_MVCApp.DataAccess.Repository.IRepository
         ISP_Call SP_Call { get; }
         ICoverTypeRepository coverType { get; }
         IProductRepository Product { get; }
+        ICompanyRepository Company { get; }
+        IApplicationUserRepository ApplicationUser { get; }
         void Save();
     }
 }
